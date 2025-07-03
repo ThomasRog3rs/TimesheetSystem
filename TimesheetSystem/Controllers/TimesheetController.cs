@@ -36,4 +36,22 @@ public class TimesheetController : Controller
         
         return Ok(timeSheet);
     }
+    
+    [HttpPut("{id:guid}")]
+    public IActionResult UpdateTimesheet(Guid id, [FromBody] TimesheetEntry timesheet)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        timesheet.Id = id;
+        var updatedTimesheet = _repository.UpdateTimesheet(timesheet);
+        if (updatedTimesheet == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(updatedTimesheet);
+    }
 }

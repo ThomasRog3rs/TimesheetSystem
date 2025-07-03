@@ -15,9 +15,21 @@ public class InMemoryTimesheetRepository : ITimesheetRepository
         return timesheet;
     }
 
-    public TimesheetEntry UpdateTimesheet(TimesheetEntry timesheet)
+    public TimesheetEntry? UpdateTimesheet(TimesheetEntry timesheet)
     {
-        throw new NotImplementedException();
+        var existingEntry = _timesheetEntries.Find(entry => entry.Id == timesheet.Id);
+        if (existingEntry == null)
+        {
+            return null;
+        }
+        
+        existingEntry.UserId = timesheet.UserId;
+        existingEntry.ProjectId = timesheet.ProjectId;
+        existingEntry.Date = timesheet.Date;
+        existingEntry.HoursWorked = Math.Round(timesheet.HoursWorked, 2);
+        existingEntry.Description = timesheet.Description;
+
+        return existingEntry;
     }
 
     public List<TimesheetEntry> GetByUserAndWeek(Guid userId, DateOnly weekStartDate)
