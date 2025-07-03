@@ -86,4 +86,42 @@ public class InMemoryTimesheetRepositoryTests
         // Assert
         Assert.Null(res);
     }
+    
+    [Fact]
+    public void DeleteTimesheet_RemovesExistingEntry()
+    {
+        // Arrange
+        var repo = new InMemoryTimesheetRepository();
+        var timesheet = new TimesheetEntry
+        {
+            UserId = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
+            ProjectId = Guid.Parse("1fb99167-3c45-4116-a75a-0e131b69b7cf"),
+            Date = DateOnly.FromDateTime(DateTime.Today),
+            HoursWorked = 7.5m,
+            Description = "To be deleted"
+        };
+        var added = repo.AddTimesheet(timesheet);
+
+        // Act
+        var deleted = repo.DeleteTimesheet(added.Id);
+        var fetched = repo.GetById(added.Id);
+
+        // Assert
+        Assert.True(deleted);
+        Assert.Null(fetched);
+    }
+
+    [Fact]
+    public void DeleteTimesheet_ReturnsFalse_WhenEntryDoesNotExist()
+    {
+        // Arrange
+        var repo = new InMemoryTimesheetRepository();
+        var nonExistentId = Guid.NewGuid();
+
+        // Act
+        var deleted = repo.DeleteTimesheet(nonExistentId);
+
+        // Assert
+        Assert.False(deleted);
+    }
 }
