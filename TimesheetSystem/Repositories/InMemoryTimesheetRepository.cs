@@ -31,7 +31,7 @@ public class InMemoryTimesheetRepository : ITimesheetRepository
 
         return existingEntry;
     }
-
+    
     public List<TimesheetEntry> GetByUserAndWeek(Guid userId, DateOnly weekStartDate)
     {
         if (weekStartDate.DayOfWeek != DayOfWeek.Monday)

@@ -111,5 +111,38 @@ namespace TimesheetSystem.Tests
 
             Assert.IsType<BadRequestObjectResult>(res);
         }
+        
+        [Fact]
+        public void GetTimesheetById_ExistingId_ReturnsOk()
+        {
+            //Arrange
+            var mockRepo = new Mock<ITimesheetRepository>();
+            var id = Guid.NewGuid();
+            var timesheet = new TimesheetEntry { Id = id };
+            mockRepo.Setup(r => r.GetById(id)).Returns(timesheet);
+
+            var controller = new TimesheetController(mockRepo.Object);
+
+            //action
+            var result = controller.GetTimesheetById(id);
+            
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(timesheet, okResult.Value);
+        }
+        
+        
+        [Fact]
+        public void GetTimesheetById_NonExistingId_ReturnsNotFound()
+        {
+            var mockRepo = new Mock<ITimesheetRepository>();
+            var id = Guid.NewGuid();
+            mockRepo.Setup(r => r.GetById(id)).Returns((TimesheetEntry)null);
+
+            var controller = new TimesheetController(mockRepo.Object);
+            
+            var result = controller.GetTimesheetById(id);
+            
+            Assert.IsType<NotFoundResult>(result);
+        }
     }
 }
