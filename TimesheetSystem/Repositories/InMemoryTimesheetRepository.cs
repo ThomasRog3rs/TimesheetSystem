@@ -42,8 +42,13 @@ public class InMemoryTimesheetRepository : ITimesheetRepository
         return _timesheetEntries.Find(entry => entry.Id == id);
     }
 
-    public void DeleteTimesheet(Guid id)
+    public bool DeleteTimesheet(Guid id)
     {
-        throw new NotImplementedException();
+        var entry = _timesheetEntries.Find(e => e.Id == id);
+        if (entry == null)
+            return false;
+        
+        _timesheetEntries.Remove(entry);
+        return true;
     }
 }

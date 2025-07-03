@@ -8,5 +8,5 @@ public interface ITimesheetRepository
     TimesheetEntry? UpdateTimesheet(TimesheetEntry timesheet);
     List<TimesheetEntry> GetByUserAndWeek(Guid userId, DateOnly weekStartDate);
     TimesheetEntry? GetById(Guid id);
-    void DeleteTimesheet(Guid id);
+    bool DeleteTimesheet(Guid id);
 }

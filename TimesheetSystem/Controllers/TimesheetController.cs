@@ -54,4 +54,15 @@ public class TimesheetController : Controller
 
         return Ok(updatedTimesheet);
     }
+    
+    [HttpDelete("{id:guid}")]
+    public IActionResult DeleteTimesheet(Guid id)
+    {
+        var deleted = _repository.DeleteTimesheet(id);
+        if (!deleted)
+        {
+            return NotFound();
+        }
+        return NoContent();
+    }
 }
