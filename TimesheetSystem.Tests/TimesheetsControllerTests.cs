@@ -64,5 +64,52 @@ namespace TimesheetSystem.Tests
             Assert.Equal(timesheet.HoursWorked, returnedEntry.HoursWorked);
             Assert.NotEqual(Guid.Empty, returnedEntry.Id);
         }
+        
+        [Fact]
+        public void AddEntry_ZeroHours_ReturnsBadRequest()
+        {
+            var mockRepo = new Mock<ITimesheetRepository>();
+            
+            var timesheet = new TimesheetEntry
+            {
+                UserId = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
+                ProjectId = Guid.Parse("1fb99167-3c45-4116-a75a-0e131b69b7cf"),
+                Date = DateOnly.FromDateTime(DateTime.Today),
+                HoursWorked = 0.0m,
+                Description = "Worked on feature X"
+            };
+            
+            var controller = new TimesheetController(mockRepo.Object);
+            ValidateModel(timesheet, controller);
+            
+            var res = controller.AddTimesheet(timesheet);
+            var badRequestRes = Assert.IsType<BadRequestObjectResult>(res);
+
+            var errors = badRequestRes.Value as SerializableError;
+            Assert.NotNull(errors);
+            Assert.True(errors.ContainsKey(nameof(TimesheetEntry.HoursWorked)));
+            var errorMessages = errors[nameof(TimesheetEntry.HoursWorked)] as string[];
+            Assert.Contains("Hours Worked must be greater than zero and less than 24 hours", errorMessages);
+        }
+        
+        [Fact]
+        public void AddEntry_MissingUserId_ReturnsBadRequest()
+        {
+            var mockRepo = new Mock<ITimesheetRepository>();
+            var timesheet = new TimesheetEntry
+            {
+                //UserId = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6") - missing user id
+                ProjectId = Guid.Parse("1fb99167-3c45-4116-a75a-0e131b69b7cf"),
+                Date = DateOnly.FromDateTime(DateTime.Today),
+                HoursWorked = 7.5m
+            };
+            
+            var controller = new TimesheetController(mockRepo.Object);
+            ValidateModel(timesheet, controller);
+
+            var res = controller.AddTimesheet(timesheet);
+
+            Assert.IsType<BadRequestObjectResult>(res);
+        }
     }
 }
