@@ -37,7 +37,7 @@ public class InMemoryTimesheetRepository : ITimesheetRepository
         throw new NotImplementedException();
     }
 
-    public TimesheetEntry GetById(Guid id)
+    public TimesheetEntry? GetById(Guid id)
     {
         return _timesheetEntries.Find(entry => entry.Id == id);
     }
