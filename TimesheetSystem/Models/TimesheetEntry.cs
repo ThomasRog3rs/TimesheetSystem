@@ -7,13 +7,13 @@ public class TimesheetEntry
     public Guid Id { get; set; }
     
     [Required]
-    public Guid UserId { get; set; }
+    public Guid? UserId { get; set; }
     
     [Required]
-    public Guid ProjectId { get; set; }
+    public Guid? ProjectId { get; set; }
     
     [Required]
-    public DateOnly Date { get; set; }
+    public DateOnly? Date { get; set; }
     
     [Required]
     [Range(0.1, 24.0, ErrorMessage = "Hours Worked must be greater than zero and less than 24 hours")]
