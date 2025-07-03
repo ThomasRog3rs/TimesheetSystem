@@ -85,7 +85,7 @@ public class TimesheetController : Controller
         }
     }
     
-    [HttpGet("{userId}/weekStart/{weekStartDate}/project-hours")]
+    [HttpGet("projectHours/userId/{userId}/weekStart/{weekStartDate}")]
     public ActionResult<Dictionary<Guid, decimal>> GetTotalHoursPerProject(
         Guid userId,
         string weekStartDate)

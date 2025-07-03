@@ -165,4 +165,131 @@ public class InMemoryTimesheetRepositoryTests
         Assert.DoesNotContain(results, e => e.Id == entry4.Id);
         Assert.Equal(2, results.Count);
     }
+    
+    [Fact]
+    public void GetTotalHoursPerProject_ReturnsCorrectSumsPerProject()
+    {
+        //arange
+        var repo = new InMemoryTimesheetRepository();
+        var userId = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6");
+        var weekStart = new DateOnly(2024, 7, 1); // Monday
+
+        var projectA = Guid.NewGuid();
+        var projectB = Guid.NewGuid();
+
+        // 2 entries for projectA, 1 for projectB, all in week
+        var entry1 = new TimesheetEntry
+        {
+            UserId = userId,
+            ProjectId = projectA,
+            Date = weekStart,
+            HoursWorked = 4.5m
+        };
+        var entry2 = new TimesheetEntry
+        {
+            UserId = userId,
+            ProjectId = projectA,
+            Date = weekStart.AddDays(2),
+            HoursWorked = 3.5m
+        };
+        var entry3 = new TimesheetEntry
+        {
+            UserId = userId,
+            ProjectId = projectB,
+            Date = weekStart.AddDays(3),
+            HoursWorked = 8m
+        };
+
+        repo.AddTimesheet(entry1);
+        repo.AddTimesheet(entry2);
+        repo.AddTimesheet(entry3);
+
+        //action
+        var result = repo.GetTotalHoursPerProject(userId, weekStart);
+
+        //assert
+        Assert.Equal(2, result.Count);
+        Assert.True(result.ContainsKey(projectA));
+        Assert.True(result.ContainsKey(projectB));
+        Assert.Equal(8.0m, result[projectA]);
+        Assert.Equal(8.0m, result[projectB]);
+    }
+    
+    [Fact]
+    public void GetTotalHoursPerProject_IgnoresEntriesOutsideWeek()
+    {
+        var repo = new InMemoryTimesheetRepository();
+        var userId = Guid.NewGuid();
+        var weekStart = new DateOnly(2024, 7, 1); // Monday
+        var projectId = Guid.NewGuid();
+
+        var inWeek = new TimesheetEntry
+        {
+            UserId = userId,
+            ProjectId = projectId,
+            Date = weekStart.AddDays(1),
+            HoursWorked = 5m
+        };
+        var outOfWeek = new TimesheetEntry
+        {
+            UserId = userId,
+            ProjectId = projectId,
+            Date = weekStart.AddDays(7), // Next Monday
+            HoursWorked = 10m
+        };
+
+        repo.AddTimesheet(inWeek);
+        repo.AddTimesheet(outOfWeek);
+        
+        var result = repo.GetTotalHoursPerProject(userId, weekStart);
+        
+        Assert.Single(result);
+        Assert.Equal(5m, result[projectId]);
+    }
+    
+    [Fact]
+    public void GetTotalHoursPerProject_IgnoresEntriesForOtherUsers()
+    {
+        var repo = new InMemoryTimesheetRepository();
+        var userId = Guid.NewGuid();
+        var otherUserId = Guid.NewGuid();
+        var weekStart = new DateOnly(2024, 7, 1); // Monday
+        var projectId = Guid.NewGuid();
+
+        var userEntry = new TimesheetEntry
+        {
+            UserId = userId,
+            ProjectId = projectId,
+            Date = weekStart,
+            HoursWorked = 6m
+        };
+        var otherUserEntry = new TimesheetEntry
+        {
+            UserId = otherUserId,
+            ProjectId = projectId,
+            Date = weekStart,
+            HoursWorked = 9m
+        };
+
+        repo.AddTimesheet(userEntry);
+        repo.AddTimesheet(otherUserEntry);
+        
+        var result = repo.GetTotalHoursPerProject(userId, weekStart);
+        
+        Assert.Single(result);
+        Assert.Equal(6m, result[projectId]);
+    }
+    
+    
+    [Fact]
+    public void GetTotalHoursPerProject_ReturnsEmpty_WhenNoEntries()
+    {
+        var repo = new InMemoryTimesheetRepository();
+        var userId = Guid.NewGuid();
+        var weekStart = new DateOnly(2024, 7, 1); // Monday
+        
+        var result = repo.GetTotalHoursPerProject(userId, weekStart);
+        
+        Assert.Empty(result);
+    }
 }
