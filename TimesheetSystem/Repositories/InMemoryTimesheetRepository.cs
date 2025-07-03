@@ -34,7 +34,24 @@ public class InMemoryTimesheetRepository : ITimesheetRepository
 
     public List<TimesheetEntry> GetByUserAndWeek(Guid userId, DateOnly weekStartDate)
     {
-        throw new NotImplementedException();
+        if (weekStartDate.DayOfWeek != DayOfWeek.Monday)
+        {
+            throw new ArgumentException("weekStartDate must be a Monday.", nameof(weekStartDate));
+        }
+
+        var weekEndDate = weekStartDate.AddDays(6);
+
+        if (weekEndDate.DayOfWeek != DayOfWeek.Sunday)
+        {
+            throw new ArgumentException("week does not end on a Sunday.", nameof(weekEndDate));
+        }
+
+        return _timesheetEntries
+            .Where(entry =>
+                entry.UserId == userId &&
+                entry.Date >= weekStartDate &&
+                entry.Date <= weekEndDate)
+            .ToList();
     }
 
     public TimesheetEntry? GetById(Guid id)
