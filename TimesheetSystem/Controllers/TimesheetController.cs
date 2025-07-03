@@ -84,4 +84,25 @@ public class TimesheetController : Controller
             return BadRequest(ex.Message);
         }
     }
+    
+    [HttpGet("{userId}/weekStart/{weekStartDate}/project-hours")]
+    public ActionResult<Dictionary<Guid, decimal>> GetTotalHoursPerProject(
+        Guid userId,
+        string weekStartDate)
+    {
+        if (!DateOnly.TryParse(weekStartDate, out var weekStart))
+        {
+            return BadRequest("Invalid weekStartDate format. Use yyyy-MM-dd.");
+        }
+
+        try
+        {
+            var result = _repository.GetTotalHoursPerProject(userId, weekStart);
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }
