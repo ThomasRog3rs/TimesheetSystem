@@ -65,4 +65,23 @@ public class TimesheetController : Controller
         }
         return NoContent();
     }
+    
+    [HttpGet("userId/{userId:guid}/weekStart/{weekStartDate}")]
+    public IActionResult GetTimesheetByUserAndWeek(Guid userId, string weekStartDate)
+    {
+        if (!DateOnly.TryParse(weekStartDate, out var weekStart))
+        {
+            return BadRequest("Invalid weekStartDate format. Use YYYY-MM-DD.");
+        }
+
+        try
+        {
+            var results = _repository.GetByUserAndWeek(userId, weekStart);
+            return Ok(results);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }

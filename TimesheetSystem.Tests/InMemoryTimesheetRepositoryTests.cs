@@ -135,6 +135,7 @@ public class InMemoryTimesheetRepositoryTests
         // Assert
         Assert.False(deleted);
     }
+    
     [Fact]
     public void GetByUserAndWeek_ReturnsEntriesForUserAndWeek()
     {
