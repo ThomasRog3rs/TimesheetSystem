@@ -5,6 +5,17 @@ namespace TimesheetSystem.Tests;
 
 public class InMemoryTimesheetRepositoryTests
 {
+    private TimesheetEntry CreateEntry(Guid userId, DateOnly date, decimal hours = 8)
+    {
+        return new TimesheetEntry
+        {
+            UserId = userId,
+            ProjectId = Guid.NewGuid(),
+            Date = date,
+            HoursWorked = hours
+        };
+    }
+    
     [Fact]
     public void AddTimesheetToList()
     {
@@ -123,5 +134,34 @@ public class InMemoryTimesheetRepositoryTests
 
         // Assert
         Assert.False(deleted);
+    }
+    [Fact]
+    public void GetByUserAndWeek_ReturnsEntriesForUserAndWeek()
+    {
+        //arange
+        var repo = new InMemoryTimesheetRepository();
+        var userId = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6");
+        var otherUserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        var weekStart = new DateOnly(2024, 7, 1); // Monday
+        var weekEnd = weekStart.AddDays(6); // Sunday
+
+        var entry1 = CreateEntry(userId, weekStart);
+        var entry2 = CreateEntry(userId, weekStart.AddDays(3), 6);
+        var entry3 = CreateEntry(userId, weekEnd.AddDays(1), 5); // Next Monday
+        var entry4 = CreateEntry(otherUserId, weekStart, 7);
+
+        repo.AddTimesheet(entry1);
+        repo.AddTimesheet(entry2);
+        repo.AddTimesheet(entry3);
+        repo.AddTimesheet(entry4);
+
+        //actions
+        var results = repo.GetByUserAndWeek(userId, weekStart);
+        
+        Assert.Contains(results, e => e.Id == entry1.Id);
+        Assert.Contains(results, e => e.Id == entry2.Id);
+        Assert.DoesNotContain(results, e => e.Id == entry3.Id);
+        Assert.DoesNotContain(results, e => e.Id == entry4.Id);
+        Assert.Equal(2, results.Count);
     }
 }
