@@ -16,7 +16,7 @@ public class TimesheetController : Controller
     }
     
     [HttpPost]
-    public IActionResult AddEntry(TimesheetEntry timesheet)
+    public IActionResult AddTimesheet(TimesheetEntry timesheet)
     {
         if (!ModelState.IsValid)
         {
