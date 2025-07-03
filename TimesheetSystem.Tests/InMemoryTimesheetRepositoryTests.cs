@@ -59,7 +59,31 @@ public class InMemoryTimesheetRepositoryTests
 
         //Assert
         Assert.NotNull(res);
-        Assert.Equal(8.5m, fetched.HoursWorked);
-        Assert.Equal("Updated", fetched.Description);
+        Assert.Equal(8.5m, fetched?.HoursWorked);
+        Assert.Equal("Updated", fetched?.Description);
+    }
+    
+    //Edge case test
+    [Fact]
+    public void UpdateTimesheet_ReturnsNull_WhenEntryDoesNotExist()
+    {
+        // Arrange
+        var repo = new InMemoryTimesheetRepository();
+        var nonExistentId = Guid.NewGuid();
+        var updateAttempt = new TimesheetEntry
+        {
+            Id = nonExistentId,
+            UserId = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
+            ProjectId = Guid.Parse("1fb99167-3c45-4116-a75a-0e131b69b7cf"),
+            Date = DateOnly.FromDateTime(DateTime.Today),
+            HoursWorked = 5.0m,
+            Description = "Should not update"
+        };
+
+        // Act
+        var res = repo.UpdateTimesheet(updateAttempt);
+
+        // Assert
+        Assert.Null(res);
     }
 }
