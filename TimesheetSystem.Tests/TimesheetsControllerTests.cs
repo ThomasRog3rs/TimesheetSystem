@@ -193,5 +193,64 @@ namespace TimesheetSystem.Tests
             
             Assert.IsType<NotFoundResult>(result);
         }
+        
+        [Fact]
+        public void GetByUserAndWeek_ValidRequest_ReturnsOk()
+        {
+            // Arrange
+            var mockRepo = new Mock<ITimesheetRepository>();
+            var userId = Guid.NewGuid();
+            var weekStart = new DateOnly(2024, 7, 1); // Monday
+            var entries = new List<TimesheetEntry>
+            {
+                new TimesheetEntry { Id = Guid.NewGuid(), UserId = userId, Date = weekStart }
+            };
+            mockRepo.Setup(r => r.GetByUserAndWeek(userId, weekStart)).Returns(entries);
+
+            var controller = new TimesheetController(mockRepo.Object);
+
+            // Act
+            var result = controller.GetTimesheetByUserAndWeek(userId, weekStart.ToString("yyyy-MM-dd"));
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(entries, okResult.Value);
+        }
+
+        [Fact]
+        public void GetByUserAndWeek_InvalidDate_ReturnsBadRequest()
+        {
+            // Arrange
+            var mockRepo = new Mock<ITimesheetRepository>();
+            var userId = Guid.NewGuid();
+            var controller = new TimesheetController(mockRepo.Object);
+
+            // Act
+            var result = controller.GetTimesheetByUserAndWeek(userId, "not-a-date");
+
+            // Assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Invalid weekStartDate format. Use YYYY-MM-DD.", badRequest.Value);
+        }
+
+        [Fact]
+        public void GetByUserAndWeek_ArgumentException_ReturnsBadRequest()
+        {
+            // Arrange
+            var mockRepo = new Mock<ITimesheetRepository>();
+            var userId = Guid.NewGuid();
+            var weekStart = new DateOnly(2024, 7, 2); // Not a Monday
+            mockRepo.Setup(r => r.GetByUserAndWeek(userId, weekStart))
+                .Throws(new ArgumentException("weekStartDate must be a Monday.", "weekStartDate"));
+
+            var controller = new TimesheetController(mockRepo.Object);
+
+            // Act
+            var result = controller.GetTimesheetByUserAndWeek(userId, weekStart.ToString("yyyy-MM-dd"));
+
+            // Assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("weekStartDate must be a Monday. (Parameter 'weekStartDate')", badRequest.Value);
+        }
     }
 }
