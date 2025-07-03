@@ -10,6 +10,7 @@ public class InMemoryTimesheetRepository : ITimesheetRepository
     public TimesheetEntry AddTimesheet(TimesheetEntry timesheet)
     {
         timesheet.Id = Guid.NewGuid();
+        timesheet.HoursWorked = Math.Round(timesheet.HoursWorked, 2);
         _timesheetEntries.Add(timesheet);
         return timesheet;
     }
@@ -26,7 +27,7 @@ public class InMemoryTimesheetRepository : ITimesheetRepository
 
     public TimesheetEntry GetById(Guid id)
     {
-        throw new NotImplementedException();
+        return _timesheetEntries.Find(entry => entry.Id == id);
     }
 
     public void DeleteTimesheet(Guid id)

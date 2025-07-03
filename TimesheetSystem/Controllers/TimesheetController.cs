@@ -18,6 +18,11 @@ public class TimesheetController : Controller
     [HttpPost]
     public IActionResult AddEntry(TimesheetEntry timesheet)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
         var newTimesheet = _repository.AddTimesheet(timesheet);
         return CreatedAtAction(nameof(GetTimesheetById), new { id = newTimesheet.Id }, newTimesheet);
     }
@@ -26,6 +31,9 @@ public class TimesheetController : Controller
     public IActionResult GetTimesheetById(Guid timesheetId)
     {
         var timeSheet = _repository.GetById(timesheetId);
+        if (timeSheet == null)
+            return NotFound();
+        
         return Ok(timeSheet);
     }
 }
