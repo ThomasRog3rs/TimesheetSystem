@@ -150,7 +150,15 @@ namespace TimesheetSystem.Tests
         {
             var mockRepo = new Mock<ITimesheetRepository>();
             var id = Guid.NewGuid();
-            var timesheet = new TimesheetEntry { Id = id, HoursWorked = 8 };
+            var timesheet = new TimesheetEntry
+            {
+                UserId = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
+                ProjectId = Guid.Parse("1fb99167-3c45-4116-a75a-0e131b69b7cf"),
+                Date = DateOnly.FromDateTime(DateTime.Today),
+                HoursWorked = 7.5m,
+                Description = "Worked on feature X"
+            };
+            
             mockRepo.Setup(repo => repo.UpdateTimesheet(timesheet)).Returns(timesheet);
 
             var controller = new TimesheetController(mockRepo.Object);
@@ -161,20 +169,29 @@ namespace TimesheetSystem.Tests
             var okResult = Assert.IsType<OkObjectResult>(result);
             Assert.Equal(timesheet, okResult.Value);
         }
-
+        
         [Fact]
-        public void UpdateTimesheet_IdMismatch_ReturnsBadRequest()
+        public void UpdateTimesheet_NotFound_ReturnsNotFound()
         {
             var mockRepo = new Mock<ITimesheetRepository>();
-            var timesheet = new TimesheetEntry { Id = Guid.NewGuid(), HoursWorked = 8 };
+            var id = Guid.NewGuid();
+            var timesheet = new TimesheetEntry
+            {
+                UserId = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
+                ProjectId = Guid.Parse("1fb99167-3c45-4116-a75a-0e131b69b7cf"),
+                Date = DateOnly.FromDateTime(DateTime.Today),
+                HoursWorked = 7.5m,
+                Description = "Worked on feature X"
+            };
             
+            mockRepo.Setup(r => r.UpdateTimesheet(timesheet)).Returns((TimesheetEntry)null);
+
             var controller = new TimesheetController(mockRepo.Object);
             ValidateModel(timesheet, controller);
             
-            var result = controller.UpdateTimesheet(Guid.NewGuid(), timesheet);
+            var result = controller.UpdateTimesheet(id, timesheet);
             
-            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Equal("ID in URL does not match ID in body.", badRequest.Value);
+            Assert.IsType<NotFoundResult>(result);
         }
     }
 }
