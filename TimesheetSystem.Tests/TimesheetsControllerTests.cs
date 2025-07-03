@@ -144,5 +144,37 @@ namespace TimesheetSystem.Tests
             
             Assert.IsType<NotFoundResult>(result);
         }
+        
+        [Fact]
+        public void UpdateTimesheet_ValidUpdate_ReturnsOk()
+        {
+            var mockRepo = new Mock<ITimesheetRepository>();
+            var id = Guid.NewGuid();
+            var timesheet = new TimesheetEntry { Id = id, HoursWorked = 8 };
+            mockRepo.Setup(repo => repo.UpdateTimesheet(timesheet)).Returns(timesheet);
+
+            var controller = new TimesheetController(mockRepo.Object);
+            ValidateModel(timesheet, controller);
+            
+            var result = controller.UpdateTimesheet(id, timesheet);
+            
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(timesheet, okResult.Value);
+        }
+
+        [Fact]
+        public void UpdateTimesheet_IdMismatch_ReturnsBadRequest()
+        {
+            var mockRepo = new Mock<ITimesheetRepository>();
+            var timesheet = new TimesheetEntry { Id = Guid.NewGuid(), HoursWorked = 8 };
+            
+            var controller = new TimesheetController(mockRepo.Object);
+            ValidateModel(timesheet, controller);
+            
+            var result = controller.UpdateTimesheet(Guid.NewGuid(), timesheet);
+            
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("ID in URL does not match ID in body.", badRequest.Value);
+        }
     }
 }
