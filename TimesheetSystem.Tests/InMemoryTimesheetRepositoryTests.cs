@@ -5,6 +5,11 @@ namespace TimesheetSystem.Tests;
 
 public class InMemoryTimesheetRepositoryTests
 {
+    public InMemoryTimesheetRepositoryTests()
+    {
+        InMemoryTimesheetRepository.ClearAll();
+    }
+    
     private TimesheetEntry CreateEntry(Guid userId, DateOnly date, decimal hours = 8)
     {
         return new TimesheetEntry

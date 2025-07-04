@@ -6,6 +6,11 @@ namespace TimesheetSystem.Repositories;
 public class InMemoryTimesheetRepository : ITimesheetRepository
 {
     private static readonly List<TimesheetEntry> _timesheetEntries = new();
+    
+    public static void ClearAll()
+    {
+        _timesheetEntries.Clear();
+    }
 
     public TimesheetEntry AddTimesheet(TimesheetEntry timesheet)
     {
