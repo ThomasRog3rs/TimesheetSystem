@@ -16,7 +16,7 @@ public class TimesheetController : Controller
     }
     
     [HttpPost]
-    public IActionResult AddTimesheet(TimesheetEntry timesheet)
+    public ActionResult<TimesheetEntry> AddTimesheet(TimesheetEntry timesheet)
     {
         if (!ModelState.IsValid)
         {
@@ -28,7 +28,7 @@ public class TimesheetController : Controller
     }
 
     [HttpGet]
-    public IActionResult GetTimesheetById(Guid timesheetId)
+    public ActionResult<TimesheetEntry> GetTimesheetById(Guid timesheetId)
     {
         var timeSheet = _repository.GetById(timesheetId);
         if (timeSheet == null)
@@ -38,7 +38,7 @@ public class TimesheetController : Controller
     }
     
     [HttpPut("{id:guid}")]
-    public IActionResult UpdateTimesheet(Guid id, [FromBody] TimesheetEntry timesheet)
+    public ActionResult<TimesheetEntry> UpdateTimesheet(Guid id, [FromBody] TimesheetEntry timesheet)
     {
         if (!ModelState.IsValid)
         {
@@ -67,7 +67,7 @@ public class TimesheetController : Controller
     }
     
     [HttpGet("userId/{userId:guid}/weekStart/{weekStartDate}")]
-    public IActionResult GetTimesheetByUserAndWeek(Guid userId, string weekStartDate)
+    public ActionResult<List<TimesheetEntry>> GetTimesheetByUserAndWeek(Guid userId, string weekStartDate)
     {
         if (!DateOnly.TryParse(weekStartDate, out var weekStart))
         {
